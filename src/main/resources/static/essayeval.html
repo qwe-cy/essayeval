@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>英语作文提交</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.7/weui.css">
+    <!--    <script src="https://res.wx.qq.com/open/libs/weui/2.4.0/weui.min.js"></script>-->
+</head>
+<body class="weui-view">
+<h1 class="weui-title">英语作文提交</h1>
+
+<form id="essayForm" class="weui-form">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <input class="weui-input" type="text" id="title" name="title" placeholder="请输入标题">
+        </div>
+    </div>
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <textarea class="weui-textarea" id="content" name="content" placeholder="请输入内容" rows="5"
+                      required></textarea>
+        </div>
+    </div>
+    <div class="weui-cell">
+        <div class="weui-cell__hd">
+            <label class="weui-label">英语级别</label>
+        </div>
+        <div class="weui-cell__bd">
+            <select class="weui-select" id="level" name="level">
+                <option value="elementary">小学</option>
+                <option value="grade7">初一</option>
+                <option value="grade8">初二</option>
+                <option value="grade9">初三</option>
+                <option value="grade10">高一</option>
+                <option value="grade11">高二</option>
+                <option value="grade12">高三</option>
+                <option value="cet4" selected>英语4级</option>
+                <option value="cet6">英语6级</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="weui-btn-area">
+        <a class="weui-btn weui-btn_primary" href="javascript:" id="submit">提交</a>
+    </div>
+</form>
+
+<div class="weui-cells__title">评分结果</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">总得分</div>
+        <div class="weui-cell__ft" id="totalScore">0.0</div>
+    </div>
+    <div class="weui-cell">
+        <div class="weui-cell__bd">词汇得分</div>
+        <div class="weui-cell__ft" id="wordsScore">0.0</div>
+    </div>
+    <div class="weui-cell">
+        <div class="weui-cell__bd">句子得分</div>
+        <div class="weui-cell__ft" id="sentencesScore">0.0</div>
+    </div>
+    <div class=weui-cell">
+        <div class="weui-cell__bd">篇章结构得分</div>
+        <div class="weui-cell__ft" id="structureScore">0.0</div>
+    </div>
+    <div class="weui-cell">
+        <div class="weui-cell__bd">内容得分</div>
+        <div class="weui-cell__ft" id="contentScore">0.0</div>
+    </div>
+</div>
+
+<div class="weui-cells__title">评价和建议</div>
+<div class="weui-cells">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">评价</div>
+        <div class="weui-cell__ft" id="comment">暂无评价</div>
+    </div>
+</div>
+
+<div class="weui-cells__title">句子点评</div>
+<div class="weui-cells" id="sentenceCommentsSection">
+</div>
+
+<!--<div id="result" class="weui-toast__hidden">-->
+<!--    <i class="weui-icon-success-no-circle"></i>-->
+<!--    <p class="weui-toast__content">作文提交成功</p>-->
+<!--</div>-->
+<script>
+    document.getElementById("submit").addEventListener("click", function () {
+        // 获取表单数据
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("content").value;
+        const level = document.getElementById("level").value;
+
+        // const params = new URLSearchParams(window.location.search);
+        // const code = params.get("code");
+        // const state = params.get("state");
+
+        // 构建作文数据对象
+        const essayData = {
+            title: title,
+            content: content,
+            grade: level
+            // code:code,
+            // state:state
+        };
+
+        // 提交作文数据到服务器
+        fetch("http://localhost:8080/api/ecc/submit", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(essayData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.status === "200") {
+                    // 作文提交成功，处理返回的结果
+
+                    // 获取结果显示区域
+                    // const resultDiv = document.getElementById("result");
+
+                    // 隐藏初始时添加的 weui-toast__hidden 类
+                    // resultDiv.classList.remove("weui-toast__hidden");
+                    // 禁用提交按钮
+                    document.getElementById("submit").disabled = true;
+                    displayEssayResults(data);
+                } else {
+                    // 作文提交失败，显示错误信息
+                    alert("作文提交失败：" + (data && data.message ? data.message : "未知错误"));
+                }
+            })
+            .catch(error => {
+                // 网络请求失败
+                alert("作文提交失败：" + error);
+            });
+    });
+
+    // 处理作文提交成功后的结果显示
+    function displayEssayResults(response) {
+        // 获取结果显示区域
+        const resultDiv = document.getElementById("result");
+
+        // 显示成功提示
+        // resultDiv.classList.remove("weui-toast__hidden");
+        // setTimeout(function() {
+        //     resultDiv.classList.add("weui-toast__hidden");
+        // }, 2000);
+
+        // 解析评分数据
+        const data = JSON.parse(response.data);
+        const totalScore = data.Data.Score;
+        const wordsScore = data.Data.ScoreCat.Words.Score;
+        const sentencesScore = data.Data.ScoreCat.Sentences.Score;
+        const structureScore = data.Data.ScoreCat.Structure.Score;
+        const contentScore = data.Data.ScoreCat.Content.Score;
+
+        // 更新页面上的得分
+        document.getElementById("totalScore").textContent = totalScore;
+        document.getElementById("wordsScore").textContent = wordsScore;
+        document.getElementById("sentencesScore").textContent = sentencesScore;
+        document.getElementById("structureScore").textContent = structureScore;
+        document.getElementById("contentScore").textContent = contentScore;
+
+        // 更新评价和建议
+        document.getElementById("comment").textContent = data.Data.Comment;
+
+        // 更新句子点评
+        const sentenceComments = data.Data.SentenceComments;
+        const sentenceCommentsSection = document.getElementById("sentenceCommentsSection");
+        sentenceCommentsSection.innerHTML = ''; // 清空原有内容
+        sentenceComments.forEach(comment => {
+            const suggestions = comment.Suggestions.map(suggestion => suggestion.Message).join('\n');
+            const sentenceText = comment.Sentence.Sentence;
+            sentenceCommentsSection.innerHTML += `
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">句子：${sentenceText}</div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">建议：${suggestions}</div>
+                    </div>
+                `;
+        });
+    }
+</script>
+</body>
+</html>
