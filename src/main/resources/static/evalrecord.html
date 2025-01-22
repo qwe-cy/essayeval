@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语作文批改记录</title>
+    <!-- 引入 WeUI 样式 -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.4.0/weui.min.css">
+    <script type="text/javascript" src="https://res.wx.qq.com/t/wx_fed/weui.js/res/1.2.19/weui.min.js"></script>
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/iscroll/5.2.0/iscroll.min.js"></script>-->
+    <style>
+        /* 启用滚动 */
+        .scrollable-dialog {
+            max-height: 300px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+<div class="weui-cells" id="essay-list">
+    <!-- 英语作文记录将会动态添加到这里 -->
+</div>
+
+<script>
+    var myScroll; // 声明 iScroll 对象
+
+    // 页面加载时执行的函数
+    window.onload = function () {
+        // 获取 URL 中的参数值
+        const code = getParameterByName("code");
+
+        if (code) {
+            // 创建包含 code 参数的 JSON 对象
+            const requestData = {code};
+
+            // 使用 Fetch 发送 POST 请求
+            fetch("http://wx.cccy.top/api/ecc/eval_record", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // 处理后端返回的数据
+                    console.log("后端返回的数据:", data);
+                    // 调用渲染函数
+                    renderEssayRecords(data);
+                })
+                .catch(error => {
+                    console.error("发生错误:", error);
+                });
+        }
+    };
+
+    // 获取 URL 中的参数值
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+        var results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    // 渲染英语作文记录的函数
+    function renderEssayRecords(data) {
+        const container = document.getElementById('essay-list');
+
+        data.data.forEach(record => {
+            const essayContent = JSON.parse(record.essayContent);
+            const correctionResult = JSON.parse(record.correctionResult);
+
+            const essayItem = document.createElement('div');
+            essayItem.className = 'weui-cells__title';
+
+            // 在每行中显示每条记录
+            essayItem.innerHTML = `
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                            <p>标题: ${essayContent.title}</p>
+                            <p>年级: ${essayContent.grade}</p>
+                            <p>批改时间: ${record.updatedAt}</p>
+                        </div>
+                        <div class="weui-cell__ft">
+                            <button class="weui-btn weui-btn_mini weui-btn_primary show-details">显示详情</button>
+                        </div>
+                    </div>
+                `;
+
+            container.appendChild(essayItem);
+
+            const detailsButton = essayItem.querySelector('.show-details');
+            detailsButton.addEventListener('click', () => {
+                // 创建一个 WeUI 弹出层
+                const dialogContent = `
+    <div class="scrollable-dialog" id="scrollable-dialog">
+        总得分: ${correctionResult.Score}<br>
+        得分详情:<br>
+        - 词汇得分: ${correctionResult.ScoreCat.Words.Score}<br>
+        - 句子得分: ${correctionResult.ScoreCat.Sentences.Score}<br>
+        - 结构得分: ${correctionResult.ScoreCat.Structure.Score}<br>
+        - 内容得分: ${correctionResult.ScoreCat.Content.Score}<br>
+        句子点评:<br>
+        ${correctionResult.SentenceComments.map(comment => `
+            - 原始句子: ${comment.Sentence.Sentence}<br>
+            - 修改建议:<br>
+            ${comment.Suggestions.map(suggestion => `
+                - ${suggestion.Type}: ${suggestion.Message}<br>
+            `).join('')}
+        `).join('')}
+    </div>`;
+
+                const dialog = weui.dialog({
+                    title: '批改详情',
+                    content: dialogContent,
+                    className: 'scrollable-dialog'
+                });
+
+                // 监听弹出层的打开事件后初始化 iScroll
+                dialog.on('open', () => {
+                    setTimeout(function () {
+                        myScroll = new IScroll('#scrollable-dialog', {
+                            mouseWheel: true,
+                            scrollbars: true,
+                            fadeScrollbars: true
+                        });
+                    }, 0);
+                });
+            });
+        });
+    }
+</script>
+</body>
+</html>

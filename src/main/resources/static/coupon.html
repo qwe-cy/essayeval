@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户卡券展示页面</title>
+    <!-- 引入WeUI 2.4.0的样式 -->
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.4.0/weui.min.css">
+    <style>
+        /* 自定义卡券样式 */
+        .custom-coupon {
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .custom-coupon p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+
+        .custom-coupon button {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .custom-coupon button[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .custom-coupon button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+<div class="weui-cells weui-cells_form">
+    <div class="weui-cell">
+        <div class="weui-cell__bd">
+            <p class="weui-cell__hd">用户卡券列表</p>
+        </div>
+    </div>
+</div>
+
+<div class="weui-cells" id="couponList">
+    <!-- 使用JavaScript动态生成卡券列表 -->
+</div>
+
+<script>
+    // 映射英文状态到中文状态
+    var statusMapping = {
+        "UNUSED": "未兑换",
+        "USED": "已兑换",
+        "EXPIRED": "过期"
+    };
+
+    // 获取页面URL中的参数
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+        var results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    // 获取用户code参数
+    var userCode = getUrlParameter("code");
+
+    // 发送GET请求以获取数据
+    fetch('http://wx.cccy.top/api/coupon?code=' + userCode)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (responseData) {
+            if (!responseData.data) {
+                document.getElementById('couponList').innerHTML = '<div class="weui-cells__title">暂无可用卡券</div>';
+                return;
+            }
+
+            // 获取卡券数据列表
+            var coupons = responseData.data;
+
+            // 获取DOM元素用于动态生成卡券列表
+            var couponList = document.querySelector('#couponList');
+
+            // 遍历卡券数据并动态生成卡券列表
+            coupons.forEach(function (coupon) {
+                var cell = document.createElement('div');
+                cell.classList.add('custom-coupon');
+
+                // 创建卡券信息显示
+                var couponInfo = document.createElement('p');
+                var chineseStatus = statusMapping[coupon.couponStatus] || coupon.couponStatus;
+
+                // 格式化显示信息
+                var displayInfo = [
+                    "类型: " + coupon.typeName,
+                    "面值: " + coupon.couponValue + "次批改",
+                    "有效期: " + coupon.expirationDate,
+                    "状态: " + chineseStatus
+                ].join(", ");
+
+                couponInfo.textContent = displayInfo;
+                cell.appendChild(couponInfo);
+
+                // 只有未使用的卡券才显示兑换按钮
+                if (coupon.couponStatus === "UNUSED") {
+                    var exchangeButton = document.createElement('button');
+                    exchangeButton.textContent = "兑换";
+                    exchangeButton.addEventListener('click', function () {
+                        if (confirm("确定要兑换这张卡券吗？")) {
+                            exchangeButton.disabled = true;
+                            exchangeButton.textContent = "兑换中...";
+
+                            fetch('http://wx.cccy.top/api/exchange', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    couponCode: coupon.couponCode,
+                                    userId: coupon.userId
+                                })
+                            })
+                                .then(function (response) {
+                                    return response.json();
+                                })
+                                .then(function (result) {
+                                    if (result.status === "200") {
+                                        coupon.couponStatus = "USED";
+                                        exchangeButton.textContent = "已兑换";
+                                        exchangeButton.disabled = true;
+                                        alert("卡券兑换成功！");
+                                        // 刷新页面显示最新状态
+                                        location.reload();
+                                    } else {
+                                        exchangeButton.disabled = false;
+                                        exchangeButton.textContent = "兑换";
+                                        alert(result.message || "兑换失败，请重试");
+                                    }
+                                })
+                                .catch(function (error) {
+                                    console.error('Error:', error);
+                                    exchangeButton.disabled = false;
+                                    exchangeButton.textContent = "兑换";
+                                    alert("兑换失败，请重试");
+                                });
+                        }
+                    });
+                    cell.appendChild(exchangeButton);
+                }
+
+                couponList.appendChild(cell);
+            });
+        })
+        .catch(function (error) {
+            console.error('Error:', error);
+            document.getElementById('couponList').innerHTML =
+                '<div class="weui-cells__title">加载失败，请刷新重试</div>';
+        });
+</script>
+</body>
+</html>
