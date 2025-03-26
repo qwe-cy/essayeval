@@ -1,5 +1,7 @@
 package com.cccy.essayeval.controller;
 
+import com.cccy.essayeval.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.stereotype.Controller;
 

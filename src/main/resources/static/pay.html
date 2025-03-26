@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员后台充值页面</title>
     <!-- 引入WeUI样式 -->
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.0.1/weui.min.css">
@@ -51,7 +52,7 @@
             };
 
             // 发起POST请求到服务器
-            fetch("https://javacoderpro.mynatapp.cc/api/admin/pay", {
+            fetch("http://wx.cccy.top/api/admin/pay", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

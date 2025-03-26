@@ -10,4 +10,8 @@ public class EccSubmitRequest {
     private String content;
 
     private String grade;
+
+    private String code;
+
+    private String status;
 }

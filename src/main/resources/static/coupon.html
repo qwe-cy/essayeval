@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="GBK">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ç”¨æˆ·å¡åˆ¸å±•ç¤ºé¡µé¢</title>
-    <!-- å¼•å…¥WeUI 2.4.0çš„æ ·å¼ -->
+    <title>ÓÃ»§¿¨È¯Õ¹Ê¾Ò³Ãæ</title>
+    <!-- ÒıÈëWeUI 2.4.0µÄÑùÊ½ -->
     <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.4.0/weui.min.css">
     <style>
-        /* è‡ªå®šä¹‰å¡åˆ¸æ ·å¼ */
+        /* ×Ô¶¨Òå¿¨È¯ÑùÊ½ */
         .custom-coupon {
             background-color: #f2f2f2;
             border: 1px solid #ddd;
@@ -45,24 +45,24 @@
 <div class="weui-cells weui-cells_form">
     <div class="weui-cell">
         <div class="weui-cell__bd">
-            <p class="weui-cell__hd">ç”¨æˆ·å¡åˆ¸åˆ—è¡¨</p>
+            <p class="weui-cell__hd">ÓÃ»§¿¨È¯ÁĞ±í</p>
         </div>
     </div>
 </div>
 
 <div class="weui-cells" id="couponList">
-    <!-- ä½¿ç”¨JavaScriptåŠ¨æ€ç”Ÿæˆå¡åˆ¸åˆ—è¡¨ -->
+    <!-- Ê¹ÓÃJavaScript¶¯Ì¬Éú³É¿¨È¯ÁĞ±í -->
 </div>
 
 <script>
-    // æ˜ å°„è‹±æ–‡çŠ¶æ€åˆ°ä¸­æ–‡çŠ¶æ€
+    // Ó³ÉäÓ¢ÎÄ×´Ì¬µ½ÖĞÎÄ×´Ì¬
     var statusMapping = {
-        "UNUSED": "æœªå…‘æ¢",
-        "USED": "å·²å…‘æ¢",
-        "EXPIRED": "è¿‡æœŸ"
+        "UNUSED": "Î´¶Ò»»",
+        "USED": "ÒÑ¶Ò»»",
+        "EXPIRED": "¹ıÆÚ"
     };
 
-    // è·å–é¡µé¢URLä¸­çš„å‚æ•°
+    // »ñÈ¡Ò³ÃæURLÖĞµÄ²ÎÊı
     function getUrlParameter(name) {
         name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
@@ -70,100 +70,80 @@
         return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    // è·å–ç”¨æˆ·codeå‚æ•°
+    // »ñÈ¡ÓÃ»§code²ÎÊı
     var userCode = getUrlParameter("code");
 
-    // å‘é€GETè¯·æ±‚ä»¥è·å–æ•°æ®
+    // ·¢ËÍGETÇëÇóÒÔ»ñÈ¡Êı¾İ
     fetch('http://wx.cccy.top/api/coupon?code=' + userCode)
         .then(function (response) {
             return response.json();
         })
         .then(function (responseData) {
-            if (!responseData.data) {
-                document.getElementById('couponList').innerHTML = '<div class="weui-cells__title">æš‚æ— å¯ç”¨å¡åˆ¸</div>';
-                return;
-            }
-
-            // è·å–å¡åˆ¸æ•°æ®åˆ—è¡¨
+            // »ñÈ¡¿¨È¯Êı¾İÁĞ±í
             var coupons = responseData.data;
 
-            // è·å–DOMå…ƒç´ ç”¨äºåŠ¨æ€ç”Ÿæˆå¡åˆ¸åˆ—è¡¨
+            // »ñÈ¡DOMÔªËØÓÃÓÚ¶¯Ì¬Éú³É¿¨È¯ÁĞ±í
             var couponList = document.querySelector('#couponList');
 
-            // éå†å¡åˆ¸æ•°æ®å¹¶åŠ¨æ€ç”Ÿæˆå¡åˆ¸åˆ—è¡¨
+            // ±éÀú¿¨È¯Êı¾İ²¢¶¯Ì¬Éú³É¿¨È¯ÁĞ±í
             coupons.forEach(function (coupon) {
                 var cell = document.createElement('div');
                 cell.classList.add('custom-coupon');
-
-                // åˆ›å»ºå¡åˆ¸ä¿¡æ¯æ˜¾ç¤º
                 var couponInfo = document.createElement('p');
-                var chineseStatus = statusMapping[coupon.couponStatus] || coupon.couponStatus;
-
-                // æ ¼å¼åŒ–æ˜¾ç¤ºä¿¡æ¯
-                var displayInfo = [
-                    "ç±»å‹: " + coupon.typeName,
-                    "é¢å€¼: " + coupon.couponValue + "æ¬¡æ‰¹æ”¹",
-                    "æœ‰æ•ˆæœŸ: " + coupon.expirationDate,
-                    "çŠ¶æ€: " + chineseStatus
-                ].join(", ");
-
-                couponInfo.textContent = displayInfo;
+                var chineseStatus = statusMapping[coupon.couponStatus];
+                couponInfo.textContent = "ÀàĞÍ: " + coupon.typeName + ", ÓĞĞ§ÆÚ: " + coupon.expirationDate + ", ×´Ì¬: " + chineseStatus;
                 cell.appendChild(couponInfo);
 
-                // åªæœ‰æœªä½¿ç”¨çš„å¡åˆ¸æ‰æ˜¾ç¤ºå…‘æ¢æŒ‰é’®
+                var exchangeButton = document.createElement('button');
                 if (coupon.couponStatus === "UNUSED") {
-                    var exchangeButton = document.createElement('button');
-                    exchangeButton.textContent = "å…‘æ¢";
+                    exchangeButton.textContent = "¶Ò»»";
                     exchangeButton.addEventListener('click', function () {
-                        if (confirm("ç¡®å®šè¦å…‘æ¢è¿™å¼ å¡åˆ¸å—ï¼Ÿ")) {
+                        var confirmation = confirm("ÄãÈ·¶¨Òª¶Ò»»¿¨È¯Âğ?");
+                        if (confirmation) {
+                            // ÓÃ»§µã»÷È·¶¨ºó£¬µ÷ÓÃAPI½øĞĞ¶Ò»»
+                            var exchangeData = {
+                                couponCode: coupon.couponCode,
+                                userId: coupon.userId
+                            };
                             exchangeButton.disabled = true;
-                            exchangeButton.textContent = "å…‘æ¢ä¸­...";
+                            exchangeButton.textContent = "¶Ò»»ÖĞ...";
 
+                            // Ê¹ÓÃPOSTÇëÇóµ÷ÓÃAPI
                             fetch('http://wx.cccy.top/api/exchange', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({
-                                    couponCode: coupon.couponCode,
-                                    userId: coupon.userId
-                                })
+                                body: JSON.stringify(exchangeData)
                             })
                                 .then(function (response) {
-                                    return response.json();
-                                })
-                                .then(function (result) {
-                                    if (result.status === "200") {
+                                    if (response.status === 200) {
+                                        // ¸üĞÂ¿¨È¯×´Ì¬ÎªÒÑ¶Ò»»
                                         coupon.couponStatus = "USED";
-                                        exchangeButton.textContent = "å·²å…‘æ¢";
+                                        exchangeButton.textContent = "ÒÑ¶Ò»»";
                                         exchangeButton.disabled = true;
-                                        alert("å¡åˆ¸å…‘æ¢æˆåŠŸï¼");
-                                        // åˆ·æ–°é¡µé¢æ˜¾ç¤ºæœ€æ–°çŠ¶æ€
-                                        location.reload();
+                                        alert("¿¨È¯¶Ò»»³É¹¦!");
                                     } else {
-                                        exchangeButton.disabled = false;
-                                        exchangeButton.textContent = "å…‘æ¢";
-                                        alert(result.message || "å…‘æ¢å¤±è´¥ï¼Œè¯·é‡è¯•");
+                                        alert("¿¨È¯¶Ò»»Ê§°Ü£¬ÇëÖØÊÔ¡£");
                                     }
                                 })
                                 .catch(function (error) {
                                     console.error('Error:', error);
-                                    exchangeButton.disabled = false;
-                                    exchangeButton.textContent = "å…‘æ¢";
-                                    alert("å…‘æ¢å¤±è´¥ï¼Œè¯·é‡è¯•");
+                                    alert("¿¨È¯¶Ò»»Ê§°Ü£¬ÇëÖØÊÔ¡£");
                                 });
                         }
                     });
-                    cell.appendChild(exchangeButton);
+                } else if (coupon.couponStatus === "USED") {
+                    exchangeButton.textContent = "ÒÑ¶Ò»»";
+                    exchangeButton.disabled = true;
                 }
+                cell.appendChild(exchangeButton);
 
                 couponList.appendChild(cell);
             });
         })
         .catch(function (error) {
             console.error('Error:', error);
-            document.getElementById('couponList').innerHTML =
-                '<div class="weui-cells__title">åŠ è½½å¤±è´¥ï¼Œè¯·åˆ·æ–°é‡è¯•</div>';
         });
 </script>
 </body>

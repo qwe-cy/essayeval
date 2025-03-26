@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>英语作文提交</title>
     <link rel="stylesheet" href="https://res.wx.qq.com/t/wx_fed/weui-source/res/2.6.7/weui.css">
     <!--    <script src="https://res.wx.qq.com/open/libs/weui/2.4.0/weui.min.js"></script>-->
@@ -92,21 +93,21 @@
         const content = document.getElementById("content").value;
         const level = document.getElementById("level").value;
 
-        // const params = new URLSearchParams(window.location.search);
-        // const code = params.get("code");
-        // const state = params.get("state");
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+        const state = params.get("state");
 
         // 构建作文数据对象
         const essayData = {
             title: title,
             content: content,
-            grade: level
-            // code:code,
-            // state:state
+            grade: level,
+            code:code,
+            state:state
         };
 
         // 提交作文数据到服务器
-        fetch("http://localhost:8080/api/ecc/submit", {
+        fetch("http://wx.cccy.top/api/ecc/submit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
