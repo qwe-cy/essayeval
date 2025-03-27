@@ -81,7 +81,7 @@ public class EccController {
         }
 
         // 实例化一个认证对象，入参需要传入腾讯云账户 SecretId 和 SecretKey，此处还需注意密钥对的保密
-        Credential cred = new Credential("AKIDMoBOTSTPM9kDar9UhkR1O5d2FG9wa5Rf", "86B9MVaZP3a0IcxDLNSgolYBcsvnT3Qa");
+        Credential cred = new Credential("SecretId", "SecretKey");
         // 实例化一个http选项，可选的，没有特殊需求可以跳过
         HttpProfile httpProfile = new HttpProfile();
         httpProfile.setEndpoint("ecc.tencentcloudapi.com");
