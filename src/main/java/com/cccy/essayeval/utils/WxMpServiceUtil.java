@@ -17,8 +17,8 @@ public class WxMpServiceUtil {
 
     static {
         config = new WxMpDefaultConfigImpl();
-        config.setAppId("wxc7e1d043c81ab610"); // 设置微信公众号的appid
-        config.setSecret("9bc8e779c415200418567244aa3cbbab"); // 设置微信公众号的app corpSecret
+        config.setAppId("appid"); // 设置微信公众号的appid
+        config.setSecret("app corpSecret"); // 设置微信公众号的app corpSecret
         config.setToken("cccy"); // 设置微信公众号的token
 
         wxMpService = new WxMpServiceImpl();
